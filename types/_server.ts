@@ -1,20 +1,23 @@
 export interface ServerResponseOkay {
-    status: number;
-    message: string;
+  stat_code: number;
+  stat_msg: string;
+  meta?: any;
 }
 
 export interface ServerResponseData<T> {
-    status: number;
-    message?: string;
-    data: T;
+  stat_code: number;
+  stat_msg?: string;
+  data: T;
+  meta?: any;
 }
 
 export interface ServerResponseError {
-    status: number;
-    message?: string;
-    error?: {
-        [k: string]: string;
-    };
+  stat_code: number;
+  stat_msg?: string;
+  meta?: any;
 }
 
-export type ServerStandardResposne<Data> = ServerResponseOkay | ServerResponseError | ServerResponseData<Data>;
+export type ServerStandardResposne<Data> =
+  | ServerResponseOkay
+  | ServerResponseError
+  | ServerResponseData<Data>;

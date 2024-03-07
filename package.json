@@ -12,7 +12,7 @@
   "dependencies": {
     "@nuxt/ui": "^2.14.2",
     "@pinia/nuxt": "^0.5.1",
-    "@types/crypto-js": "^4.2.2",
+    "@types/crypto-js": "^4.2.1",
     "@types/uuid": "^9.0.8",
     "@vueuse/core": "^10.9.0",
     "@vueuse/nuxt": "^10.9.0",

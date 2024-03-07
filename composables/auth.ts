@@ -5,43 +5,34 @@ export function useAuth() {
   const app = useAppStore();
   const path = useApiPath();
   const publicApi = usePublicApi();
+  const runtime = useRuntimeConfig();
+  const notif = useNotification();
 
   async function doLogin(param: { email: string; password: string }) {
+    const encrypt = await publicApi.post(
+      "/api/login",
+      {
+        password: param.password,
+      },
+      {
+        baseURL: "",
+      }
+    );
+    // console.log(encrypt);
+
     const response: LoginResponse = await publicApi.post(path.authLogin, {
       email: param.email,
-      password: param.password,
+      password: encrypt,
     });
-    app.refreshToken = response.data.token.refreshToken;
-    app.accessToken = response.data.token.accessToken;
+
+    console.log(response);
+
+    app.accessToken = response.data.token;
+    app.refreshToken = response.data.token;
+
     app.user = {
-      id: response.data.user.id,
-      email: response.data.user.email,
-      name: response.data.user.name,
-      profilePicture: response.data.user.profilePicture,
+      name: response.data.name,
     };
-  }
-
-  async function refreshAuth(): Promise<boolean> {
-    try {
-      const response: LoginResponse = await publicApi.get(path.authRefresh, {
-        headers: {
-          Authorization: "Bearer " + (app.refreshToken ?? "invalid_token"),
-        },
-      });
-      app.accessToken = response.data.token.accessToken;
-      app.refreshToken = response.data.token.refreshToken;
-      app.user = {
-        id: response.data.user.id,
-        email: response.data.user.email,
-        name: response.data.user.name,
-        profilePicture: response.data.user.profilePicture,
-      };
-      console.log(app.user);
-
-      return true;
-    } catch (e) {
-      return false;
-    }
   }
 
   async function logout() {
@@ -52,8 +43,16 @@ export function useAuth() {
   }
 
   return {
-    refreshAuth,
     logout,
     doLogin,
+    refreshAuth: async () => {
+      if (
+        app.accessToken === "invalid_token" &&
+        app.refreshToken === undefined
+      ) {
+        return false;
+      }
+      return true;
+    },
   };
 }

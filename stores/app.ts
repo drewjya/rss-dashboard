@@ -1,4 +1,3 @@
-import { useStorage } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { v4 as uuid } from "uuid";
 
@@ -7,16 +6,14 @@ export const useAppStore = defineStore("GlobalApp", () => {
   const colorMode = useColorMode();
   // States
   const user = ref<{
-    id: number;
-    email: string;
     name: string;
-    profilePicture?: string;
   }>();
   const accessToken = ref<string>("invalid_token");
   const sessionId = ref<string>(uuid());
-  const refreshToken = useStorage<string | undefined>(
+
+  const refreshToken = useCookie<string | undefined>(
     useRuntimeConfig().public.REFRESH_TOKEN_KEY,
-    null
+    { maxAge: 60 * 60 * 24 * 30 }
   );
 
   const headerTitle = ref<string>();

@@ -2,8 +2,8 @@ import type { ServerResponseData } from ".";
 import type { TokenDto, UserDto } from "./_dto";
 
 export type LoginResponse = ServerResponseData<{
-  user: UserDto;
-  token: TokenDto;
+  name: string;
+  token: string;
 }>;
 
 export type TokenResponse = ServerResponseData<TokenDto>;

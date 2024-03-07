@@ -8,16 +8,18 @@ import * as crypto from "crypto";
  */
 
 export const encryptAes = (data: string, privateKey: string, ivKey: string) => {
-    try {
-        const cipher = crypto.createCipheriv("aes-256-cbc", privateKey, ivKey);
-        cipher.setAutoPadding(true); // Set auto padding to true
+  try {
+    const cipher = crypto.createCipheriv("aes-256-cbc", privateKey, ivKey);
+    cipher.setAutoPadding(true); // Set auto padding to true
 
-        let encrypted = cipher.update(data, "utf8", "base64");
-        encrypted += cipher.final("base64");
-        return encrypted;
-    } catch (error) {
-        return "";
-    }
+    let encrypted = cipher.update(data, "utf8", "base64");
+    encrypted += cipher.final("base64");
+    return encrypted;
+  } catch (error) {
+    console.log(error);
+
+    return "";
+  }
 };
 
 export const decryptAes = (

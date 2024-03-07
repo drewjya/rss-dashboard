@@ -1,79 +1,86 @@
-import axios, { type AxiosError, type AxiosResponse, HttpStatusCode, type InternalAxiosRequestConfig } from 'axios';
-import { useAppStore } from '~/stores/app';
-import type { ServerResponseData, ServerResponseError, ServerResponseOkay, ServerStandardResposne } from '~/types';
+import axios, {
+  type AxiosError,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+} from "axios";
+import { useAppStore } from "~/stores/app";
+import type {
+  ServerResponseData,
+  ServerResponseError,
+  ServerResponseOkay,
+  ServerStandardResposne,
+} from "~/types";
 
 type RetryableRequest = InternalAxiosRequestConfig & {
-    _isRetry: boolean;
+  _isRetry: boolean;
 };
 
 export function usePrivateApi() {
-    // Dependency
-    const app = useAppStore();
-    const auth = useAuth();
+  // Dependency
+  const app = useAppStore();
+  const auth = useAuth();
 
-    // datas
-    const api = axios.create({
-        baseURL: useRuntimeConfig().public.API_BASE_URL,
-        headers: {
-            Accept: 'application/json',
-        },
-    });
+  // datas
+  const api = axios.create({
+    baseURL: useRuntimeConfig().public.API_BASE_URL,
+    headers: {
+      Accept: "application/json",
+    },
+  });
 
-    function responseOrErr(obj?: AxiosResponse): ServerStandardResposne<any> {
-        if (obj && obj.data) {
-            return obj.data as ServerResponseData<any> | ServerResponseOkay;
-        }
-        else {
-            const noResponseError: ServerResponseError = {
-                status: HttpStatusCode.InternalServerError,
-                message: 'server_no_response',
-            };
-            return noResponseError;
-        }
+  function responseOrErr(obj?: AxiosResponse): ServerStandardResposne<any> {
+    if (obj && obj.data) {
+      return obj.data as ServerResponseData<any> | ServerResponseOkay;
+    } else {
+      const noResponseError: ServerResponseError = {
+        stat_code: 400,
+        stat_msg: "server_no_response",
+      };
+      return noResponseError;
     }
+  }
 
-    api.interceptors.request.use(
-        // handling request
-        (config: InternalAxiosRequestConfig) => {
-            config.headers.Authorization = `Bearer ${app.accessToken}`;
-            config.headers.sessionId = app.sessionId;
-            return config;
-        },
+  api.interceptors.request.use(
+    // handling request
+    (config: InternalAxiosRequestConfig) => {
+      console.log(app.refreshToken);
 
-        // handling request error
-        (error: AxiosError<any, any>) => {
-            const response = responseOrErr(error.response);
-            return Promise.reject(response);
-        },
-    );
+      config.headers.Authorization = `Bearer ${app.refreshToken}`;
+      config.headers.sessionId = app.sessionId;
+      return config;
+    },
 
-    api.interceptors.response.use(
-        // handling response
-        (response: AxiosResponse) => {
-            return response.data;
-        },
+    // handling request error
+    (error: AxiosError<any, any>) => {
+      const response = responseOrErr(error.response);
+      return Promise.reject(response);
+    }
+  );
 
-        // handling response error
-        async (error: AxiosError<any, any>) => {
-            const response = responseOrErr(error.response);
-            const originalRequest = error.config as RetryableRequest;
+  api.interceptors.response.use(
+    // handling response
+    (response: AxiosResponse) => {
+      return response.data;
+    },
 
-            // Retry unauthorized request for the first time
-            if (
-                response.status === HttpStatusCode.Unauthorized
-                && !originalRequest._isRetry
-            ) {
-                originalRequest._isRetry = true;
-                const isRefreshSuccess = await auth.refreshAuth();
-                if (!isRefreshSuccess) {
-                    await auth.logout();
-                    return Promise.reject(response);
-                }
-                return api(originalRequest);
-            }
-            return Promise.reject(response);
-        },
-    );
+    // handling response error
+    async (error: AxiosError<any, any>) => {
+      const response = responseOrErr(error.response);
+      const originalRequest = error.config as RetryableRequest;
 
-    return api;
+      // Retry unauthorized request for the first time
+      if (response.stat_code === 400 && !originalRequest._isRetry) {
+        originalRequest._isRetry = true;
+        const isRefreshSuccess = await auth.refreshAuth();
+        if (!isRefreshSuccess) {
+          await auth.logout();
+          return Promise.reject(response);
+        }
+        return api(originalRequest);
+      }
+      return Promise.reject(response);
+    }
+  );
+
+  return api;
 }

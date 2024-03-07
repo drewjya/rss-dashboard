@@ -24,16 +24,14 @@ export function usePublicApi() {
       return obj.data as ServerResponseData<any> | ServerResponseOkay;
     } else {
       const noResponseError: ServerResponseError = {
-        status: HttpStatusCode.InternalServerError,
-        message: "server_no_response",
+        stat_code: HttpStatusCode.InternalServerError,
+        stat_msg: "server_no_response",
       };
       return noResponseError;
     }
   }
 
   api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-    console.log(config.headers);
-
     return config;
   });
 

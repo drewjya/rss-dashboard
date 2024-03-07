@@ -19,7 +19,7 @@ const loginForm = useFormDeclaration({
       email: form.data.email,
       password: form.data.password,
     });
-    await navigateTo("/?refresh=true");
+    await navigateTo("/");
   },
 });
 </script>
@@ -53,6 +53,7 @@ const loginForm = useFormDeclaration({
             type="password"
           />
         </UFormGroup>
+
         <span class="w-full text-center text-sm text-red-500">
           {{ loginForm.error.value }}
         </span>
