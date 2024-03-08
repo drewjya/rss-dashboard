@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 const rss = ref([]);
 
+
+
 const columns = [
   { label: "Title", key: "title" },
   { label: "Description", key: "description" },
@@ -83,6 +85,9 @@ onMounted(async () => {
         >
           <span>{{ row.title }}</span>
         </button>
+      </template>
+      <template #created_at-data="{ row }">
+        <span>{{ new Date(row.created_at).toLocaleString() }}</span>
       </template>
     </UTable>
     <div
