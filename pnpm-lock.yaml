@@ -12,7 +12,7 @@ dependencies:
     specifier: ^0.5.1
     version: 0.5.1(vue@3.4.21)
   '@types/crypto-js':
-    specifier: ^4.2.2
+    specifier: ^4.2.1
     version: 4.2.2
   '@types/uuid':
     specifier: ^9.0.8
