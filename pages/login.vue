@@ -3,6 +3,7 @@ import { z } from "zod";
 
 definePageMeta({
   layout: "auth",
+  colorMode: "light",
 });
 
 const { $v } = useMessage();
